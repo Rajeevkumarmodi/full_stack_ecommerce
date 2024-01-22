@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      trim: true,
     },
     profilePic: {
       type: String,
@@ -24,7 +25,7 @@ const userSchema = new mongoose.Schema(
     },
     address: [
       {
-        types: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Address",
       },
     ],
@@ -37,7 +38,7 @@ const userSchema = new mongoose.Schema(
     carts: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Cart",
+        ref: "Product",
       },
     ],
     orders: [
