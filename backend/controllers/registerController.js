@@ -110,3 +110,44 @@ export const loginController = async (req, res) => {
     res.status(500).json(new ApiResponse(500, error.message, false));
   }
 };
+
+// change password controller
+
+export const changePassword = async (req, res) => {
+  const { password, confirmPassword } = req.body;
+
+  if (!password || !confirmPassword) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, "all fields are required", false));
+  }
+
+  if (password !== confirmPassword) {
+    return res
+      .status(404)
+      .json(
+        new ApiResponse(404, "Password and confirm password not match", false)
+      );
+  }
+
+  try {
+    const userId = req.user?._id;
+    const hashPassword = bcrypt.hashSync(password, 13);
+
+    const update = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          password: hashPassword,
+        },
+      },
+      { new: true }
+    );
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "password change successfully", true));
+  } catch (error) {
+    return res.status(404).json(new ApiResponse(404, error.message, false));
+  }
+};
