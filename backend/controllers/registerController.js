@@ -1,7 +1,11 @@
 import User from "../models/user.models.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import path from "path";
+
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { deleteOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
+import { error } from "console";
 
 // user registration controller
 
@@ -149,5 +153,79 @@ export const changePassword = async (req, res) => {
       .json(new ApiResponse(200, "password change successfully", true));
   } catch (error) {
     return res.status(404).json(new ApiResponse(404, error.message, false));
+  }
+};
+
+// change profile photo controller
+
+export const changeProfilePhoto = async (req, res) => {
+  const file = req.file?.originalname;
+  // console.log(req.file);
+
+  if (!file) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, "please provide image", false));
+  }
+  const extension = path.extname(file);
+
+  if (extension !== ".png" && extension !== ".jpg" && extension !== ".jpeg") {
+    return res
+      .status(404)
+      .json(
+        new ApiResponse(404, "only .png , .jpeg , jpg formate allowed", false)
+      );
+  }
+
+  if (req.file.size > 512000) {
+    return res
+      .status(404)
+      .json(
+        new ApiResponse(404, "please provide image size less then 500kb", false)
+      );
+  }
+
+  try {
+    const result = await uploadOnCloudinary(req.file.path);
+    if (!result) {
+      return res
+        .status(404)
+        .json(new ApiResponse(404, "Image not uploaded", false));
+    }
+
+    // update profile photo
+
+    const userId = req.user?._id;
+    const previousImage = req.user?.profilePic;
+
+    const update = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          profilePic: result?.secure_url,
+        },
+      },
+      { new: true }
+    );
+
+    // find previous image to cloudinaryId
+    const imageIdArr = previousImage.split("/");
+    const imageId = imageIdArr[imageIdArr?.length - 1];
+    const cloudinaryId = imageId.split(".")[0];
+    // delete previous image function call
+    const deleteResponse = await deleteOnCloudinary(cloudinaryId);
+    console.log("deleteResponse", deleteResponse);
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          "image upload successfully",
+          true,
+          result?.secure_url
+        )
+      );
+  } catch (error) {
+    res.status(500).json(new ApiResponse(500, error.message, false));
   }
 };
