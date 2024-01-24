@@ -1,6 +1,7 @@
 import express from "express";
 import { Router } from "express";
 import {
+  changeName,
   changePassword,
   changeProfilePhoto,
   loginController,
@@ -19,4 +20,6 @@ router.post(
   authMiddleware,
   changeProfilePhoto
 );
+
+router.post("/changename", authMiddleware, changeName);
 export default router;

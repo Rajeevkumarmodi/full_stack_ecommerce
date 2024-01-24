@@ -23,10 +23,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    address: [
+    shippingAddress: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Address",
+        ref: "Shipping",
       },
     ],
     wishlist: [
@@ -35,10 +35,10 @@ const userSchema = new mongoose.Schema(
         ref: "Product",
       },
     ],
-    carts: [
+    cart: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: "Cart",
       },
     ],
     orders: [
@@ -47,6 +47,17 @@ const userSchema = new mongoose.Schema(
         ref: "Order",
       },
     ],
+    isBlock: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    role: {
+      type: String,
+      required: true,
+      enum: ["User", "Seller", "Admin"],
+      default: "User",
+    },
   },
   { timestamps: true }
 );

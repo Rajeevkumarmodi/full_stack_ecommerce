@@ -229,3 +229,34 @@ export const changeProfilePhoto = async (req, res) => {
     res.status(500).json(new ApiResponse(500, error.message, false));
   }
 };
+
+// // change name controller
+
+export const changeName = async (req, res) => {
+  const { name } = req.body;
+
+  if (!name) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, "Please provide name", false));
+  }
+
+  try {
+    const userId = req.user?._id;
+    const update = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          name,
+        },
+      },
+      { new: true }
+    );
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "name change successfully", true));
+  } catch (error) {
+    return res.status(404).json(new ApiResponse(404, error.message, false));
+  }
+};
